@@ -2,14 +2,11 @@ const clothingItem = require("../models/clothingItem");
 const { BAD_REQUEST, DEFAULT_ERROR, NOT_FOUND } = require("../utils/errors");
 
 const createItem = (req, res) => {
-  console.log(req.user);
-
-  const { name, weather, imageURL } = req.body;
+  const { name, weather, imageUrl } = req.body;
   const owner = req.user._id;
   clothingItem
-    .create({ name, weather, imageURL, owner })
+    .create({ name, weather, imageUrl, owner })
     .then((item) => {
-      console.log(item);
       res.send({ data: item });
     })
     .catch((e) => {
@@ -17,10 +14,11 @@ const createItem = (req, res) => {
         res.status(BAD_REQUEST).send({
           message: "Validation Failed!",
         });
+      } else {
+        res
+          .status(DEFAULT_ERROR)
+          .send({ message: "An error has occurred on the server." });
       }
-      res
-        .status(DEFAULT_ERROR)
-        .send({ message: "An error has occurred on the server." });
     });
 };
 
@@ -69,7 +67,7 @@ const likeItem = (req, res) => {
       { $addToSet: { likes: req.user._id } },
       { new: true },
     )
-    .onFail()
+    .orFail()
     .then((like) => res.send({ like }))
     .catch((e) => {
       if (e.name === "DocumentNotFoundError") {
@@ -96,7 +94,7 @@ const unlikeItem = (req, res) => {
       { $pull: { likes: req.user._id } },
       { new: true },
     )
-    .onFail()
+    .orFail()
     .then((like) => res.send({ like }))
     .catch((e) => {
       if (e.name === "DocumentNotFoundError") {

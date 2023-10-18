@@ -8,7 +8,7 @@ const getUsers = (req, res) => {
 };
 
 const getUser = (req, res) => {
-  const { userId } = req.user._id;
+  const userId = req.params.userId;
 
   Users.findById(userId)
     .orFail()
@@ -31,19 +31,22 @@ const getUser = (req, res) => {
 };
 
 const createUser = (req, res) => {
-  console.log(req);
-  console.log(req.body);
   const { name, avatar } = req.body;
 
   Users.create({ name, avatar })
     .then((user) => {
-      console.log(user);
       res.send({ data: user });
     })
     .catch((e) => {
-      res
-        .status(DEFAULT_ERROR)
-        .send({ message: "An error has occurred on the server." });
+      if (e.name === "ValidationError") {
+        res.status(BAD_REQUEST).send({
+          message: "Validation Failed!",
+        });
+      } else {
+        res
+          .status(DEFAULT_ERROR)
+          .send({ message: "An error has occurred on the server." });
+      }
     });
 };
 module.exports = { getUsers, getUser, createUser };
