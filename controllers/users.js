@@ -4,11 +4,15 @@ const { NOT_FOUND, BAD_REQUEST, DEFAULT_ERROR } = require("../utils/errors");
 const getUsers = (req, res) => {
   Users.find({})
     .then((users) => res.send(users))
-    .catch((e) => res.send({ message: "Error from getUsers" }, e));
+    .catch(() =>
+      res
+        .status(DEFAULT_ERROR)
+        .send({ message: "An error has occurred on the server." }),
+    );
 };
 
 const getUser = (req, res) => {
-  const userId = req.params.userId;
+  const { userId } = req.params;
 
   Users.findById(userId)
     .orFail()
