@@ -52,7 +52,7 @@ user.statics.findUserByCredentials = function findUserByCredentials(
           return Promise.reject(new Error("Incorrect email or password"));
         }
 
-        return user;
+        return thisUser;
       });
     });
 };
