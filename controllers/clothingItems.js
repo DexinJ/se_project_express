@@ -1,5 +1,10 @@
 const clothingItem = require("../models/clothingItem");
-const { BAD_REQUEST, DEFAULT_ERROR, NOT_FOUND } = require("../utils/errors");
+const {
+  BAD_REQUEST,
+  DEFAULT_ERROR,
+  NOT_FOUND,
+  FORBIDDEN,
+} = require("../utils/errors");
 
 const createItem = (req, res) => {
   const { name, weather, imageUrl } = req.body;
@@ -35,12 +40,27 @@ const getItem = (req, res) => {
 
 const deleteItem = (req, res) => {
   const { itemId } = req.params;
-
+  const owner = req.user._id;
   clothingItem
-    .findByIdAndDelete(itemId)
+    .findById(itemId)
     .orFail()
     .then((item) => {
-      res.send({ data: item });
+      if (item.owner.equals(owner)) {
+        clothingItem
+          .findByIdAndDelete(itemId)
+          .then((i) => {
+            res.send({ data: i });
+          })
+          .catch(() => {
+            res.status(DEFAULT_ERROR).send({
+              message: "An error has occurred on the server.",
+            });
+          });
+      } else {
+        res
+          .status(FORBIDDEN)
+          .send({ message: "Cannot delete items created by other users" });
+      }
     })
     .catch((e) => {
       if (e.name === "DocumentNotFoundError") {
