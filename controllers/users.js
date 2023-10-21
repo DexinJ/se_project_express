@@ -13,35 +13,41 @@ const { JWT_SECRET } = require("../utils/config");
 
 const createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
-  Users.findOne({ email }).then((user) => {
-    if (user) {
-      res.status(CONFLICT).send({ message: "Email already used!" });
-    } else {
-      bcrypt
-        .hash(password, 10)
-        .then((hash) => Users.create({ name, avatar, email, password: hash }))
-        .then((newUser) => {
-          res.send({
-            data: {
-              name: newUser.name,
-              avatar: newUser.avatar,
-              email: newUser.email,
-            },
-          });
-        })
-        .catch((e) => {
-          if (e.name === "ValidationError") {
-            res.status(BAD_REQUEST).send({
-              message: "Validation Failed!",
+  Users.findOne({ email })
+    .then((user) => {
+      if (user) {
+        res.status(CONFLICT).send({ message: "Email already used!" });
+      } else {
+        bcrypt
+          .hash(password, 10)
+          .then((hash) => Users.create({ name, avatar, email, password: hash }))
+          .then((newUser) => {
+            res.send({
+              data: {
+                name: newUser.name,
+                avatar: newUser.avatar,
+                email: newUser.email,
+              },
             });
-          } else {
-            res
-              .status(DEFAULT_ERROR)
-              .send({ message: "An error has occurred on the server." });
-          }
-        });
-    }
-  });
+          })
+          .catch((e) => {
+            if (e.name === "ValidationError") {
+              res.status(BAD_REQUEST).send({
+                message: "Validation Failed!",
+              });
+            } else {
+              res
+                .status(DEFAULT_ERROR)
+                .send({ message: "An error has occurred on the server." });
+            }
+          });
+      }
+    })
+    .catch(() => {
+      res
+        .status(DEFAULT_ERROR)
+        .send({ message: "An error has occurred on the server." });
+    });
 };
 
 const login = (req, res) => {
