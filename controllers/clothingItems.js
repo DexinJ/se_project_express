@@ -12,7 +12,7 @@ const createItem = (req, res) => {
   clothingItem
     .create({ name, weather, imageUrl, owner })
     .then((item) => {
-      res.send({ data: item });
+      res.send(item);
     })
     .catch((e) => {
       if (e.name === "ValidationError") {
@@ -30,7 +30,7 @@ const createItem = (req, res) => {
 const getItem = (req, res) => {
   clothingItem
     .find({})
-    .then((items) => res.send({ items }))
+    .then((items) => res.send({ data: items }))
     .catch(() => {
       res
         .status(DEFAULT_ERROR)
@@ -88,7 +88,7 @@ const likeItem = (req, res) => {
       { new: true },
     )
     .orFail()
-    .then((like) => res.send({ like }))
+    .then((like) => res.send(like))
     .catch((e) => {
       if (e.name === "DocumentNotFoundError") {
         res.status(NOT_FOUND).send({
@@ -115,7 +115,7 @@ const unlikeItem = (req, res) => {
       { new: true },
     )
     .orFail()
-    .then((like) => res.send({ like }))
+    .then((like) => res.send(like))
     .catch((e) => {
       if (e.name === "DocumentNotFoundError") {
         res.status(NOT_FOUND).send({

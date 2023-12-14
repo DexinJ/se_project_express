@@ -51,6 +51,7 @@ const createUser = (req, res) => {
 };
 
 const login = (req, res) => {
+  console.log("request to signin received");
   const { email, password } = req.body;
   if (!email || !password) {
     res
@@ -62,7 +63,7 @@ const login = (req, res) => {
         const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
           expiresIn: "7d",
         });
-        res.send({ token });
+        res.send({ token: token, avatar: user.avatar, name: user.name });
       })
       .catch((e) => {
         if (e.message === "Incorrect email or password") {
@@ -82,7 +83,7 @@ const getCurrentUser = (req, res) => {
   const userId = req.user._id;
   Users.findById(userId)
     .orFail()
-    .then((user) => res.send({ data: user }))
+    .then((user) => res.send(user))
     .catch((e) => {
       if (e.name === "DocumentNotFoundError") {
         res.status(NOT_FOUND).send({
@@ -109,7 +110,7 @@ const updateProfile = (req, res) => {
     { name, avatar },
     { new: true, runValidators: true },
   )
-    .then((user) => res.send({ data: user }))
+    .then((user) => res.send(user))
     .catch((e) => {
       if (e.name === "ValidationError") {
         res.status(BAD_REQUEST).send({

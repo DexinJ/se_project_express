@@ -21,3 +21,4 @@ app.post("/signin", login);
 app.use(routes);
 
 app.listen(PORT, () => {});
+console.log("App listening at PORT 3001")
