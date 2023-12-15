@@ -51,7 +51,6 @@ const createUser = (req, res) => {
 };
 
 const login = (req, res) => {
-  console.log("request to signin received");
   const { email, password } = req.body;
   if (!email || !password) {
     res
