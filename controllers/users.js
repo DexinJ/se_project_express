@@ -14,7 +14,7 @@ const createUser = (req, res) => {
   Users.findOne({ email })
     .then((user) => {
       if (user) {
-        res.status(CONFLICT).send({ message: "Email already used!" });
+        next(new ConflictError("Email already used!"));
       } else {
         bcrypt
           .hash(password, 10)
@@ -45,9 +45,7 @@ const createUser = (req, res) => {
 const login = (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
-    res
-      .status(AUTHORIZATION_ERROR)
-      .send({ message: "Incorrect email or password" });
+    next(new AuthorizationError("Incorrect email or password"));
   } else {
     Users.findUserByCredentials(email, password)
       .then((user) => {
