@@ -4,6 +4,10 @@ const cors = require("cors");
 const helmet = require("helmet");
 const routes = require("./routes");
 const { createUser, login } = require("./controllers/users");
+const errorHandler = require("./middlewares/errorHandler");
+const { errors } = require("celebrate");
+const { validateSignUp, validateLogIn } = require("./middlewares/validation");
+const { requestLogger, errorLogger } = require("./middlewares/logger");
 
 const { PORT = 3001 } = process.env;
 const app = express();
@@ -15,10 +19,16 @@ app.use(cors());
 app.use(helmet());
 app.use(express.json());
 
-app.post("/signup", createUser);
-app.post("/signin", login);
+app.post("/signup", validateSignUp, createUser);
+app.post("/signin", validateLogIn, login);
 
+app.use(requestLogger);
 app.use(routes);
 
+app.use(errorLogger);
+
+app.use(errors());
+app.use(errorHandler);
+
 app.listen(PORT, () => {});
-console.log("App listening at PORT 3001")
+console.log("App listening at PORT 3001");

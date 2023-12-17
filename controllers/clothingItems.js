@@ -1,10 +1,7 @@
 const clothingItem = require("../models/clothingItem");
-const {
-  BAD_REQUEST,
-  DEFAULT_ERROR,
-  NOT_FOUND,
-  FORBIDDEN,
-} = require("../utils/errors");
+const { BadRequestError } = require("../Errors/BadRequestError");
+const { ForbiddenError } = require("../Errors/ForbiddenError");
+const { NotFoundError } = require("../Errors/NotFoundError");
 
 const createItem = (req, res) => {
   const { name, weather, imageUrl } = req.body;
@@ -16,13 +13,9 @@ const createItem = (req, res) => {
     })
     .catch((e) => {
       if (e.name === "ValidationError") {
-        res.status(BAD_REQUEST).send({
-          message: "Validation Failed!",
-        });
+        next(new BadRequestError("Invalid data received."));
       } else {
-        res
-          .status(DEFAULT_ERROR)
-          .send({ message: "An error has occurred on the server." });
+        next(e);
       }
     });
 };
@@ -31,11 +24,7 @@ const getItem = (req, res) => {
   clothingItem
     .find({})
     .then((items) => res.send({ data: items }))
-    .catch(() => {
-      res
-        .status(DEFAULT_ERROR)
-        .send({ message: "An error has occurred on the server." });
-    });
+    .catch((err) => next(err));
 };
 
 const deleteItem = (req, res) => {
@@ -51,30 +40,18 @@ const deleteItem = (req, res) => {
           .then((i) => {
             res.send({ data: i });
           })
-          .catch(() => {
-            res.status(DEFAULT_ERROR).send({
-              message: "An error has occurred on the server.",
-            });
-          });
+          .catch((err) => next(err));
       } else {
-        res
-          .status(FORBIDDEN)
-          .send({ message: "Cannot delete items created by other users" });
+        next(new ForbiddenError("Cannot delete items created by other users"));
       }
     })
     .catch((e) => {
       if (e.name === "DocumentNotFoundError") {
-        res.status(NOT_FOUND).send({
-          message: "Cannot find item with requested Id",
-        });
+        next(new NotFoundError("Cannot find item with requested Id"));
       } else if (e.name === "CastError") {
-        res.status(BAD_REQUEST).send({
-          message: "Invalid Id.",
-        });
+        next(new BadRequestError("Invalid Id."));
       } else {
-        res.status(DEFAULT_ERROR).send({
-          message: "An error has occurred on the server.",
-        });
+        next(e);
       }
     });
 };
@@ -91,17 +68,11 @@ const likeItem = (req, res) => {
     .then((like) => res.send(like))
     .catch((e) => {
       if (e.name === "DocumentNotFoundError") {
-        res.status(NOT_FOUND).send({
-          message: "Cannot find item with requested Id",
-        });
+        next(new NotFoundError("Cannot find item with requested Id"));
       } else if (e.name === "CastError") {
-        res.status(BAD_REQUEST).send({
-          message: "Invalid Id.",
-        });
+        next(new BadRequestError("Invalid Id."));
       } else {
-        res.status(DEFAULT_ERROR).send({
-          message: "An error has occurred on the server.",
-        });
+        next(e);
       }
     });
 };
@@ -118,17 +89,11 @@ const unlikeItem = (req, res) => {
     .then((like) => res.send(like))
     .catch((e) => {
       if (e.name === "DocumentNotFoundError") {
-        res.status(NOT_FOUND).send({
-          message: "Cannot find item with requested Id",
-        });
+        next(new NotFoundError("Cannot find item with requested Id"));
       } else if (e.name === "CastError") {
-        res.status(BAD_REQUEST).send({
-          message: "Invalid Id.",
-        });
+        next(new BadRequestError("Invalid Id."));
       } else {
-        res.status(DEFAULT_ERROR).send({
-          message: "An error has occurred on the server.",
-        });
+        next(e);
       }
     });
 };

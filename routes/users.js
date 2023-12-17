@@ -1,6 +1,7 @@
 const router = require("express").Router();
 
 const { getCurrentUser, updateProfile } = require("../controllers/users");
+const { validateUpdateProfile } = require("../middlewares/validation");
 
 // CRUD
 
@@ -10,7 +11,7 @@ const { getCurrentUser, updateProfile } = require("../controllers/users");
 router.get("/me", getCurrentUser);
 
 // Edit
-router.patch("/me", updateProfile);
+router.patch("/me", validateUpdateProfile, updateProfile);
 
 // Delete
 

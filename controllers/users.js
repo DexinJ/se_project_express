@@ -2,14 +2,12 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const Users = require("../models/user");
 
-const {
-  NOT_FOUND,
-  BAD_REQUEST,
-  DEFAULT_ERROR,
-  AUTHORIZATION_ERROR,
-  CONFLICT,
-} = require("../utils/errors");
 const { JWT_SECRET } = require("../utils/config");
+const { BadRequestError } = require("../Errors/BadRequestError");
+const { ForbiddenError } = require("../Errors/ForbiddenError");
+const { NotFoundError } = require("../Errors/NotFoundError");
+const { AuthorizationError } = require("../Errors/AuthorizationError");
+const { ConflictError } = require("../Errors/ConfilctError");
 
 const createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
@@ -32,21 +30,15 @@ const createUser = (req, res) => {
           })
           .catch((e) => {
             if (e.name === "ValidationError") {
-              res.status(BAD_REQUEST).send({
-                message: "Validation Failed!",
-              });
+              next(new BadRequestError("Validation Failed!"));
             } else {
-              res
-                .status(DEFAULT_ERROR)
-                .send({ message: "An error has occurred on the server." });
+              next(e);
             }
           });
       }
     })
-    .catch(() => {
-      res
-        .status(DEFAULT_ERROR)
-        .send({ message: "An error has occurred on the server." });
+    .catch((e) => {
+      next(e);
     });
 };
 
@@ -66,13 +58,9 @@ const login = (req, res) => {
       })
       .catch((e) => {
         if (e.message === "Incorrect email or password") {
-          res
-            .status(AUTHORIZATION_ERROR)
-            .send({ message: "Incorrect email or password" });
+          next(new AuthorizationError("Incorrect email or password"));
         } else {
-          res
-            .status(DEFAULT_ERROR)
-            .send({ message: "An error has occurred on the server." });
+          next(e);
         }
       });
   }
@@ -85,17 +73,11 @@ const getCurrentUser = (req, res) => {
     .then((user) => res.send(user))
     .catch((e) => {
       if (e.name === "DocumentNotFoundError") {
-        res.status(NOT_FOUND).send({
-          message: "Cannot find user",
-        });
+        next(new NotFoundError("Cannot find user"));
       } else if (e.name === "CastError") {
-        res.status(BAD_REQUEST).send({
-          message: "Invalid Id.",
-        });
+        next(new BadRequestError("Invalid Id."));
       } else {
-        res.status(DEFAULT_ERROR).send({
-          message: "An error has occurred on the server.",
-        });
+        next(e);
       }
     });
 };
@@ -112,17 +94,11 @@ const updateProfile = (req, res) => {
     .then((user) => res.send(user))
     .catch((e) => {
       if (e.name === "ValidationError") {
-        res.status(BAD_REQUEST).send({
-          message: "Validation Failed!",
-        });
+        next(new BadRequestError("Validation Failed!"));
       } else if (e.name === "DocumentNotFoundError") {
-        res.status(NOT_FOUND).send({
-          message: "Cannot find user",
-        });
+        next(new NotFoundError("Cannot find user"));
       } else {
-        res
-          .status(DEFAULT_ERROR)
-          .send({ message: "An error has occurred on the server." });
+        next(e);
       }
     });
 };
