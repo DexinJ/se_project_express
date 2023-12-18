@@ -1,9 +1,9 @@
 const clothingItem = require("../models/clothingItem");
-const { BadRequestError } = require("../Errors/BadRequestError");
-const { ForbiddenError } = require("../Errors/ForbiddenError");
-const { NotFoundError } = require("../Errors/NotFoundError");
+const BadRequestError = require("../Errors/BadRequestError");
+const ForbiddenError = require("../Errors/ForbiddenError");
+const NotFoundError = require("../Errors/NotFoundError");
 
-const createItem = (req, res) => {
+const createItem = (req, res, next) => {
   const { name, weather, imageUrl } = req.body;
   const owner = req.user._id;
   clothingItem
@@ -20,14 +20,14 @@ const createItem = (req, res) => {
     });
 };
 
-const getItem = (req, res) => {
+const getItem = (req, res, next) => {
   clothingItem
     .find({})
     .then((items) => res.send({ data: items }))
-    .catch((err) => next(err));
+    .catch(next);
 };
 
-const deleteItem = (req, res) => {
+const deleteItem = (req, res, next) => {
   const { itemId } = req.params;
   const owner = req.user._id;
   clothingItem
@@ -40,7 +40,7 @@ const deleteItem = (req, res) => {
           .then((i) => {
             res.send({ data: i });
           })
-          .catch((err) => next(err));
+          .catch(next);
       } else {
         next(new ForbiddenError("Cannot delete items created by other users"));
       }
@@ -56,7 +56,7 @@ const deleteItem = (req, res) => {
     });
 };
 
-const likeItem = (req, res) => {
+const likeItem = (req, res, next) => {
   const { itemId } = req.params;
   clothingItem
     .findByIdAndUpdate(
@@ -77,7 +77,7 @@ const likeItem = (req, res) => {
     });
 };
 
-const unlikeItem = (req, res) => {
+const unlikeItem = (req, res, next) => {
   const { itemId } = req.params;
   clothingItem
     .findByIdAndUpdate(

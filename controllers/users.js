@@ -3,13 +3,12 @@ const jwt = require("jsonwebtoken");
 const Users = require("../models/user");
 
 const { JWT_SECRET } = require("../utils/config");
-const { BadRequestError } = require("../Errors/BadRequestError");
-const { ForbiddenError } = require("../Errors/ForbiddenError");
-const { NotFoundError } = require("../Errors/NotFoundError");
-const { AuthorizationError } = require("../Errors/AuthorizationError");
-const { ConflictError } = require("../Errors/ConfilctError");
+const BadRequestError = require("../Errors/BadRequestError");
+const NotFoundError = require("../Errors/NotFoundError");
+const AuthorizationError = require("../Errors/AuthorizationError");
+const ConflictError = require("../Errors/ConfilctError");
 
-const createUser = (req, res) => {
+const createUser = (req, res, next) => {
   const { name, avatar, email, password } = req.body;
   Users.findOne({ email })
     .then((user) => {
@@ -40,7 +39,7 @@ const createUser = (req, res) => {
     });
 };
 
-const login = (req, res) => {
+const login = (req, res, next) => {
   const { email, password } = req.body;
   if (!email || !password) {
     next(new AuthorizationError("Incorrect email or password"));
@@ -50,7 +49,7 @@ const login = (req, res) => {
         const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
           expiresIn: "7d",
         });
-        res.send({ token: token, avatar: user.avatar, name: user.name });
+        res.send({ token, avatar: user.avatar, name: user.name });
       })
       .catch((e) => {
         if (e.message === "Incorrect email or password") {
@@ -62,7 +61,7 @@ const login = (req, res) => {
   }
 };
 
-const getCurrentUser = (req, res) => {
+const getCurrentUser = (req, res, next) => {
   const userId = req.user._id;
   Users.findById(userId)
     .orFail()
@@ -78,7 +77,7 @@ const getCurrentUser = (req, res) => {
     });
 };
 
-const updateProfile = (req, res) => {
+const updateProfile = (req, res, next) => {
   const userId = req.user._id;
   const { name, avatar } = req.body;
 
