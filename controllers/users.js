@@ -21,11 +21,9 @@ const createUser = (req, res) => {
           .then((hash) => Users.create({ name, avatar, email, password: hash }))
           .then((newUser) => {
             res.send({
-              data: {
-                name: newUser.name,
-                avatar: newUser.avatar,
-                email: newUser.email,
-              },
+              name: newUser.name,
+              avatar: newUser.avatar,
+              email: newUser.email,
             });
           })
           .catch((e) => {
